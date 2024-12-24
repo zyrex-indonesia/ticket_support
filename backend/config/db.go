@@ -16,20 +16,20 @@ func InitDB() {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	// Create tickets table if not exists
+	// Create tickets table with the correct schema
 	query := `
-		CREATE TABLE IF NOT EXISTS tickets (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			username TEXT NOT NULL, -- User who created the ticket
-			description TEXT NOT NULL, -- Description of the issue
-			priority TEXT NOT NULL, -- Priority: Tinggi, Sedang, Rendah
-			category TEXT NOT NULL, -- Category: Jaringan, Hardware, Software, etc.
-			attachment TEXT, -- Optional: Path to uploaded file
-			status TEXT DEFAULT 'Baru', -- Ticket status: Baru, Dalam Proses, Selesai
-			created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- Timestamp when the ticket was created
-			date TEXT NOT NULL, -- Date of submission (YYYY-MM-DD)
-			time TEXT NOT NULL  -- Time of submission (HH:MM:SS)
-		);`
+        CREATE TABLE IF NOT EXISTS tickets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL, -- User's name
+            description TEXT NOT NULL, -- Description of the issue
+            priority TEXT NOT NULL, -- Priority: Tinggi, Sedang, Rendah
+            category TEXT NOT NULL, -- Category: Jaringan, Hardware, Software, etc.
+            attachment TEXT, -- Optional: Path to uploaded file
+            status TEXT DEFAULT 'Baru', -- Ticket status: Baru, Dalam Proses, Selesai
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP, -- Timestamp when the ticket was created
+            date TEXT NOT NULL, -- Date of submission (YYYY-MM-DD)
+            time TEXT NOT NULL  -- Time of submission (HH:MM:SS)
+        );`
 	if _, err := DB.Exec(query); err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}

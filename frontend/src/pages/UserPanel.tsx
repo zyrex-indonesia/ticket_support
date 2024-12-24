@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../App.css'; 
+import '../App.css';
 
 const UserPanel: React.FC = () => {
   const [tickets, setTickets] = useState([]);
-  const [username, setUsername] = useState('');
+  const [name, setName] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Tinggi');
   const [category, setCategory] = useState('Jaringan');
@@ -15,37 +15,52 @@ const UserPanel: React.FC = () => {
     const fetchTickets = async () => {
       try {
         const response = await axios.get('http://localhost:8080/tickets');
-        setTickets(response.data);
+        console.log('Fetched Tickets:', response.data); // Debugging
+        setTickets(response.data || []); // Default to empty array if null
       } catch (error) {
         console.error('Error fetching tickets:', error);
+        setTickets([]); // Handle error by setting empty array
       }
     };
     fetchTickets();
   }, []);
 
-  // Handle ticket submission
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
+    e.preventDefault(); // Prevent default form submission
+  
+    // Validate fields
+    if (!name || !description || !priority || !category) {
+      alert('All fields are required!');
+      return;
+    }
+  
     const formData = new FormData();
-    formData.append('username', username);
+    formData.append('name', name);
     formData.append('description', description);
     formData.append('priority', priority);
     formData.append('category', category);
     if (attachment) formData.append('attachment', attachment);
-
+  
     try {
-      await axios.post('http://localhost:8080/tickets', formData, {
+      // Submit ticket
+      const response = await axios.post('http://localhost:8080/tickets', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
-      alert('Ticket submitted successfully!');
-      setUsername('');
+      alert(response.data.message || 'Ticket submitted successfully!');
+  
+      // Clear form fields
+      setName('');
       setDescription('');
       setPriority('Tinggi');
       setCategory('Jaringan');
       setAttachment(null);
-    } catch (error) {
-      console.error('Error submitting ticket:', error);
+  
+      // Fetch updated tickets
+      const updatedTickets = await axios.get('http://localhost:8080/tickets');
+      setTickets(updatedTickets.data);
+    } catch (error: any) {
+      console.error('Error submitting ticket:', error.response?.data || error.message);
+      alert(error.response?.data?.error || 'Failed to submit the ticket. Please try again.');
     }
   };
 
@@ -60,16 +75,22 @@ const UserPanel: React.FC = () => {
         />
         <h2 className="text-xl font-semibold mb-4">Status</h2>
         <div>
-          {tickets.map((ticket: any, index) => (
-            <div
-              key={index}
-              className="bg-white p-4 rounded-lg shadow mb-4"
-            >
-              <p><strong>Kategori:</strong> {ticket.category}</p>
-              <p><strong>Prioritas:</strong> {ticket.priority}</p>
-              <p><strong>Status:</strong> {ticket.status}</p>
-            </div>
-          ))}
+          {tickets && tickets.length > 0 ? (
+            tickets.map((ticket: any, index) => (
+              <div
+                key={index}
+                className="bg-white p-4 rounded-lg shadow mb-4"
+              >
+                <p><strong>Nama:</strong> {ticket.name}</p>
+                <p><strong>Kategori:</strong> {ticket.category}</p>
+                <p><strong>Prioritas:</strong> {ticket.priority}</p>
+                <p><strong>Status:</strong> {ticket.status}</p>
+                <p><strong>Deskripsi:</strong> {ticket.description}</p>
+              </div>
+            ))
+          ) : (
+            <p className="text-gray-500">No tickets available.</p>
+          )}
         </div>
       </div>
 
@@ -85,8 +106,8 @@ const UserPanel: React.FC = () => {
             <span className="block text-sm font-medium">Nama:</span>
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
               className="w-full p-3 rounded-lg text-black"
               placeholder="Masukkan Nama"
             />
