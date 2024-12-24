@@ -6,13 +6,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// SetupRoutes sets up the API routes
+// SetupRoutes sets up the API routes.
 func SetupRoutes(router *gin.Engine) {
 	// Initialize the database
 	config.InitDB()
 
-	// Define routes
-	router.POST("/login", Login)
-	router.POST("/tickets", SubmitTicket)
-	router.GET("/tickets", GetTickets)
+	// Public routes
+	router.POST("/tickets", SubmitTicketHandler)
+
+	// Admin routes
+	router.PUT("/tickets/status", UpdateTicketStatusHandler)
+	router.GET("/tickets", GetTicketsHandler) // Fetch all tickets (admin)
 }
