@@ -4,27 +4,9 @@
 
 @font-face {
   font-family: 'Poppins';
-  src: url('../src/assets/fonts/Poppins/Poppins-Medium.ttf') format('truetype'),
-       url('../src/assets/fonts/Roboto/Roboto-Medium.ttf') format('truetype');
-  font-weight: 400 400;
-  font-style: normal;
+  src: url('./src/assets/fonts/Poppins/Poppins-Medium.ttf') format('truetype');
 }
 
-/* Reset styles to avoid unwanted padding or margins */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-  }
-  
-  /* Ensure the body and html cover the full viewport */
-  html, body {
-    height: 100%;
-    overflow: hidden; /* Prevent scrolling */
-  }
-  
-  /* Ensure the root React app covers the viewport */
-  #root {
-    height: 100%;
-  }
-  
+body {
+  font-family: 'Poppins', sans-serif;
+}

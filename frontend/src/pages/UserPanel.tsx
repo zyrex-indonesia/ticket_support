@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import '../App.css'; 
 
 const UserPanel: React.FC = () => {
   const [tickets, setTickets] = useState([]);
-  const [username, setUsername] = useState(''); // Allow user input for name
+  const [username, setUsername] = useState('');
   const [description, setDescription] = useState('');
   const [priority, setPriority] = useState('Tinggi');
   const [category, setCategory] = useState('Jaringan');
@@ -38,50 +39,31 @@ const UserPanel: React.FC = () => {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       alert('Ticket submitted successfully!');
-      setUsername(''); // Clear username field
-      setDescription(''); // Clear description field
-      setPriority('Tinggi'); // Reset priority to default
-      setCategory('Jaringan'); // Reset category to default
-      setAttachment(null); // Clear attachment
+      setUsername('');
+      setDescription('');
+      setPriority('Tinggi');
+      setCategory('Jaringan');
+      setAttachment(null);
     } catch (error) {
       console.error('Error submitting ticket:', error);
     }
   };
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        height: '100%', // Matches the height of the root element
-        width: '100%',
-        overflow: 'hidden', // Prevents scrollbars
-      }}
-    >
+    <div className="flex h-screen font-poppins">
       {/* Left Side: Ticket List */}
-      <div
-        style={{
-          flex: 1,
-          backgroundColor: '#e0e0e0',
-          padding: '20px',
-          overflowY: 'auto', // If ticket list grows, allow scrolling only inside this section
-        }}
-      >
+      <div className="flex-1 bg-gray-200 p-5 overflow-y-auto">
         <img
           src="/logo.png"
           alt="Zyrex Logo"
-          style={{ width: '150px', height: 'auto', marginBottom: '20px' }}
+          className="w-40 mb-6"
         />
-        <h2>Status</h2>
-        <div style={{ marginTop: '20px' }}>
+        <h2 className="text-xl font-semibold mb-4">Status</h2>
+        <div>
           {tickets.map((ticket: any, index) => (
             <div
               key={index}
-              style={{
-                backgroundColor: '#fff',
-                margin: '10px 0',
-                padding: '10px',
-                borderRadius: '8px',
-              }}
+              className="bg-white p-4 rounded-lg shadow mb-4"
             >
               <p><strong>Kategori:</strong> {ticket.category}</p>
               <p><strong>Prioritas:</strong> {ticket.priority}</p>
@@ -90,105 +72,78 @@ const UserPanel: React.FC = () => {
           ))}
         </div>
       </div>
-  
+
       {/* Right Side: Ticket Form */}
-      <div
-        style={{
-          flex: 2,
-          backgroundColor: '#d32f2f',
-          padding: '40px',
-          color: '#fff',
-          overflowY: 'auto', // Allows form scrolling if it overflows
-        }}
-      >
-        <h2>Form Help Desk</h2>
+      <div className="flex-2 bg-red-700 p-10 text-white overflow-y-auto">
+        <h2 className="text-2xl font-bold mb-6">Form Help Desk</h2>
         <form
           onSubmit={handleSubmit}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: '15px',
-          }}
+          className="flex flex-col gap-6"
         >
           {/* Nama */}
           <label>
-            Nama:
+            <span className="block text-sm font-medium">Nama:</span>
             <input
               type="text"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px',
-                boxSizing: 'border-box',
-              }}
+              className="w-full p-3 rounded-lg text-black"
               placeholder="Masukkan Nama"
             />
           </label>
-  
+
           {/* Prioritas */}
           <label>
-            Prioritas:
+            <span className="block text-sm font-medium">Prioritas:</span>
             <select
               value={priority}
               onChange={(e) => setPriority(e.target.value)}
-              style={{ width: '100%', padding: '10px', boxSizing: 'border-box' }}
+              className="w-full p-3 rounded-lg text-black"
             >
               <option value="Tinggi">Tinggi</option>
               <option value="Sedang">Sedang</option>
               <option value="Rendah">Rendah</option>
             </select>
           </label>
-  
+
           {/* Kategori */}
           <label>
-            Kategori:
+            <span className="block text-sm font-medium">Kategori:</span>
             <select
               value={category}
               onChange={(e) => setCategory(e.target.value)}
-              style={{ width: '100%', padding: '10px', boxSizing: 'border-box' }}
+              className="w-full p-3 rounded-lg text-black"
             >
               <option value="Jaringan">Jaringan</option>
               <option value="Hardware">Hardware</option>
               <option value="Software">Software</option>
             </select>
           </label>
-  
+
           {/* Lampiran */}
           <label>
-            Lampiran:
+            <span className="block text-sm font-medium">Lampiran:</span>
             <input
               type="file"
               onChange={(e) => setAttachment(e.target.files ? e.target.files[0] : null)}
-              style={{ width: '100%', boxSizing: 'border-box' }}
+              className="w-full p-3 rounded-lg text-black"
             />
           </label>
-  
+
           {/* Deskripsi */}
           <label>
-            Deskripsi:
+            <span className="block text-sm font-medium">Deskripsi:</span>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '10px',
-                boxSizing: 'border-box',
-                minHeight: '100px',
-              }}
+              className="w-full p-3 rounded-lg text-black h-32"
               placeholder="Masukkan deskripsi masalah"
             />
           </label>
-  
+
           <button
             type="submit"
-            style={{
-              padding: '10px',
-              backgroundColor: 'green',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-            }}
+            className="p-3 bg-green-600 text-white font-bold rounded-lg hover:bg-green-700"
           >
             Submit
           </button>
@@ -196,7 +151,6 @@ const UserPanel: React.FC = () => {
       </div>
     </div>
   );
-  
 };
 
 export default UserPanel;
