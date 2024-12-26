@@ -100,26 +100,27 @@ func sendEmailNotification(ticket models.Ticket) {
 	}
 }
 
-// UpdateTicketStatus updates the status and person in charge of a ticket (Admin access only)
-func UpdateTicketStatus(c *gin.Context) {
+func UpdateTicketHandler(c *gin.Context) {
+	id := c.Param("id")
 	var request struct {
-		ID             int    `json:"id"`               // Ticket ID
-		Status         string `json:"status"`           // New status
-		PersonInCharge string `json:"person_in_charge"` // Person in charge
+		Status         string `json:"status"`
+		PersonInCharge string `json:"person_in_charge"`
 	}
-
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
-	// Update the ticket in the database
-	_, err := config.DB.Exec(
-		"UPDATE tickets SET status = ?, person_in_charge = ? WHERE id = ?",
-		request.Status, request.PersonInCharge, request.ID,
-	)
+	query := "UPDATE tickets SET status = ?, person_in_charge = ? WHERE id = ?"
+	result, err := config.DB.Exec(query, request.Status, request.PersonInCharge, id)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update ticket"})
+		return
+	}
+
+	rowsAffected, _ := result.RowsAffected()
+	if rowsAffected == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Ticket not found"})
 		return
 	}
 
