@@ -6,10 +6,12 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"ticket_support/config"
 	"ticket_support/models"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/go-gomail/gomail"
 )
 
 // GetTicketsHandler fetches all tickets
@@ -76,24 +78,50 @@ func SubmitTicketHandler(c *gin.Context) {
 		return
 	}
 
+	// Send email notification
+	go sendEmailNotification(ticket)
+
 	c.JSON(http.StatusOK, gin.H{"message": "Ticket submitted successfully"})
 }
 
-// UpdateTicketStatusHandler updates the status of a specific ticket
-func UpdateTicketStatusHandler(c *gin.Context) {
-	var request struct {
-		ID     int    `json:"id"`
-		Status string `json:"status"`
+// sendEmailNotification sends an email to the admin when a ticket is submitted
+func sendEmailNotification(ticket models.Ticket) {
+	mailer := gomail.NewMessage()
+	mailer.SetHeader("To", "MiaTampi@ezyrex.com")
+	mailer.SetHeader("Subject", "New Ticket Submitted")
+	mailer.SetBody("text/plain",
+		fmt.Sprintf("A new ticket has been submitted.\n\nName: %s\nDescription: %s\nPriority: %s\nCategory: %s\nDate: %s\nTime: %s",
+			ticket.Name, ticket.Description, ticket.Priority, ticket.Category, ticket.Date, ticket.Time))
+
+	dialer := gomail.NewDialer("smtp.example.com", 587, "FrederickRicoHartanto@zyrex.com", "Zyr3xuser")
+
+	if err := dialer.DialAndSend(mailer); err != nil {
+		log.Printf("Failed to send email: %v", err)
 	}
-	if err := c.BindJSON(&request); err != nil {
+}
+
+// UpdateTicketStatus updates the status and person in charge of a ticket (Admin access only)
+func UpdateTicketStatus(c *gin.Context) {
+	var request struct {
+		ID             int    `json:"id"`               // Ticket ID
+		Status         string `json:"status"`           // New status
+		PersonInCharge string `json:"person_in_charge"` // Person in charge
+	}
+
+	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid input"})
 		return
 	}
 
-	if err := models.UpdateTicketStatus(request.ID, request.Status); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update ticket status"})
+	// Update the ticket in the database
+	_, err := config.DB.Exec(
+		"UPDATE tickets SET status = ?, person_in_charge = ? WHERE id = ?",
+		request.Status, request.PersonInCharge, request.ID,
+	)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update ticket"})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"message": "Ticket status updated successfully"})
+	c.JSON(http.StatusOK, gin.H{"message": "Ticket updated successfully"})
 }

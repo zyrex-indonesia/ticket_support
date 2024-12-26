@@ -13,13 +13,15 @@ func Login(c *gin.Context) {
 		return
 	}
 
+	// Hardcoded credentials
+	const predefinedUsername = "admin"
+	const predefinedPassword = "Zyr3xuser"
+
 	username := credentials["username"]
 	password := credentials["password"]
 
-	if username == "admin" && password == "password" {
+	if username == predefinedUsername && password == predefinedPassword {
 		c.JSON(http.StatusOK, gin.H{"token": "admin-token"})
-	} else if password == "password" {
-		c.JSON(http.StatusOK, gin.H{"token": "user-token"})
 	} else {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 	}
