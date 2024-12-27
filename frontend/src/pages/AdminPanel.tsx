@@ -6,7 +6,7 @@ interface NullString {
   String: string;
   Valid: boolean;
 }
-// Define the type for a ticket
+
 interface Ticket {
   id: number;
   name: string;
@@ -19,7 +19,7 @@ interface Ticket {
   completed_time?: NullString;
   person_in_charge?: string;
   time: string;
-  attachment?: string; // Add this property for attachment
+  attachment?: string;
 }
 
 const AdminPanel: React.FC = () => {
@@ -125,7 +125,7 @@ const AdminPanel: React.FC = () => {
   };
 
   return (
-    <div className="bg-red-900 h-screen flex flex-col">
+    <div className="bg-red-900 min-h-screen flex flex-col">
       {/* Header Section */}
       <div className="flex justify-between items-center bg-white px-6 py-4 shadow-md fixed top-0 left-0 w-full z-10">
         <img src="/logo.png" alt="Zyrex Logo" className="h-8" />
@@ -138,11 +138,11 @@ const AdminPanel: React.FC = () => {
       </div>
 
       {/* Scrollable Content */}
-      <div className="pt-20 flex-1 overflow-y-auto pb-6">
+      <div className="pt-20 pb-4 overflow-y-auto flex-1 max-h-screen">
         {/* Filters Section */}
-        <div className="bg-white rounded-lg shadow-lg p-8 mt-6 max-w-3xl mx-auto">
+        <div className="bg-white rounded-lg shadow-lg p-4 md:p-8 mt-6 max-w-3xl mx-auto mb-6">
           <h2 className="text-lg font-bold mb-4">Filters</h2>
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium">
                 Priority:
@@ -200,10 +200,10 @@ const AdminPanel: React.FC = () => {
         </div>
 
         {/* Tickets Section */}
-        <div className="grid grid-cols-1 gap-6 p-4">
+        <div className="grid grid-cols-1 gap-6 px-4">
           {filteredTickets.map((ticket) => (
-            <div key={ticket.id} className="bg-white rounded-lg shadow-lg p-6">
-              <div className="grid grid-cols-2 gap-4">
+            <div key={ticket.id} className="bg-white rounded-lg shadow-lg p-4 md:p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-lg font-semibold">Nama: {ticket.name}</p>
                   <p>Kategori: {ticket.category}</p>
@@ -211,21 +211,21 @@ const AdminPanel: React.FC = () => {
                   <p>Status: {ticket.status}</p>
                   <p>Deskripsi: {ticket.description}</p>
                 </div>
-                  <div>
-                    <p>Submitted Time: {ticket.created_at.replace('T', ' ').replace('Z', '')}</p>
-                    <p>
-                      Progress Start Time:{' '}
-                      {ticket.progress_start_time?.Valid
-                        ? ticket.progress_start_time.String.replace('T', ' ').replace('Z', '')
-                        : 'N/A'}
-                    </p>
-                    <p>
-                      Completed Time:{' '}
-                      {ticket.completed_time?.Valid
-                        ? ticket.completed_time.String.replace('T', ' ').replace('Z', '')
-                        : 'N/A'}
-                    </p>
-                  </div>
+                <div>
+                  <p>Submitted Time: {ticket.created_at.replace('T', ' ').replace('Z', '')}</p>
+                  <p>
+                    Progress Start Time:{' '}
+                    {ticket.progress_start_time?.Valid
+                      ? ticket.progress_start_time.String.replace('T', ' ').replace('Z', '')
+                      : 'N/A'}
+                  </p>
+                  <p>
+                    Completed Time:{' '}
+                    {ticket.completed_time?.Valid
+                      ? ticket.completed_time.String.replace('T', ' ').replace('Z', '')
+                      : 'N/A'}
+                  </p>
+                </div>
               </div>
               {ticket.attachment && (
                 <p className="mt-4">
@@ -268,7 +268,7 @@ const AdminPanel: React.FC = () => {
               </div>
               <button
                 onClick={() => handleSubmit(ticket.id)}
-                className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+                className="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 w-full md:w-auto"
               >
                 Submit
               </button>
