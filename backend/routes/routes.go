@@ -20,6 +20,6 @@ func SetupRoutes(router *gin.Engine) {
 	// Admin routes
 	router.PUT("/tickets/status", UpdateTicketHandler)
 	router.PUT("/tickets/:id", UpdateTicketHandler)
-	router.Static("/uploads", "/uploads")
+	router.Static("/uploads", "./uploads")
 	router.GET("/tickets", GetTicketsHandler) // Fetch all tickets (admin)
 }

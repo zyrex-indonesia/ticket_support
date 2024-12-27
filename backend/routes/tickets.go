@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"database/sql"
 	"fmt"
 	"io"
 	"log"
@@ -111,8 +112,40 @@ func UpdateTicketHandler(c *gin.Context) {
 		return
 	}
 
-	query := "UPDATE tickets SET status = ?, person_in_charge = ? WHERE id = ?"
-	result, err := config.DB.Exec(query, request.Status, request.PersonInCharge, id)
+	// Initialize nullable fields
+	var progressStartTime sql.NullString
+	var completedTime sql.NullString
+
+	// Set progress_start_time if status is "Dalam Proses"
+	if request.Status == "Dalam Proses" {
+		progressStartTime = sql.NullString{String: time.Now().Format("2006-01-02 15:04:05"), Valid: true}
+	} else {
+		progressStartTime = sql.NullString{Valid: false}
+	}
+
+	// Set completed_time if status is "Selesai"
+	if request.Status == "Selesai" {
+		completedTime = sql.NullString{String: time.Now().Format("2006-01-02 15:04:05"), Valid: true}
+	} else {
+		completedTime = sql.NullString{Valid: false}
+	}
+
+	// Update query
+	query := `
+        UPDATE tickets 
+        SET status = ?, 
+            person_in_charge = ?, 
+            progress_start_time = CASE WHEN ? THEN ? ELSE progress_start_time END, 
+            completed_time = CASE WHEN ? THEN ? ELSE completed_time END 
+        WHERE id = ?
+    `
+	result, err := config.DB.Exec(query,
+		request.Status,
+		request.PersonInCharge,
+		progressStartTime.Valid, progressStartTime.String,
+		completedTime.Valid, completedTime.String,
+		id,
+	)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update ticket"})
 		return

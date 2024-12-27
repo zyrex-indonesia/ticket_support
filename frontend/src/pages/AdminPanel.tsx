@@ -2,6 +2,10 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
+interface NullString {
+  String: string;
+  Valid: boolean;
+}
 // Define the type for a ticket
 interface Ticket {
   id: number;
@@ -11,8 +15,8 @@ interface Ticket {
   category: string;
   status: string;
   created_at: string;
-  progress_start_time?: string;
-  completed_time?: string;
+  progress_start_time?: NullString;
+  completed_time?: NullString;
   person_in_charge?: string;
   time: string;
   attachment?: string; // Add this property for attachment
@@ -120,16 +124,8 @@ const AdminPanel: React.FC = () => {
     }
   };
 
-  const calculateDuration = (start: string | undefined, end: string | undefined): string => {
-    if (!start || !end) return 'N/A';
-    const startTime = new Date(start).getTime();
-    const endTime = new Date(end).getTime();
-    const durationInSeconds = Math.floor((endTime - startTime) / 1000);
-    return `${Math.floor(durationInSeconds / 60)} minutes, ${durationInSeconds % 60} seconds`;
-  };
-
   return (
-    <div className="bg-red-900 min-h-screen">
+    <div className="bg-red-900 h-screen flex flex-col">
       {/* Header Section */}
       <div className="flex justify-between items-center bg-white px-6 py-4 shadow-md fixed top-0 left-0 w-full z-10">
         <img src="/logo.png" alt="Zyrex Logo" className="h-8" />
@@ -141,130 +137,144 @@ const AdminPanel: React.FC = () => {
         </button>
       </div>
 
-      <div className="bg-white rounded-lg shadow-lg pt-20 p-8 mt-6 max-w-3xl mx-auto">
-        <h2 className="text-lg font-bold mb-4">Filters</h2>
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium">
-              Priority:
-              <select
-                className="block w-full mt-1 p-2 border rounded-lg"
-                value={filters.priority}
-                onChange={(e) => handleFiltersChange('priority', e.target.value)}
-              >
-                <option value="">All</option>
-                <option value="Tinggi">Tinggi</option>
-                <option value="Sedang">Sedang</option>
-                <option value="Rendah">Rendah</option>
-              </select>
-            </label>
-          </div>
-          <div>
-            <label className="block text-sm font-medium">
-              Status:
-              <select
-                className="block w-full mt-1 p-2 border rounded-lg"
-                value={filters.status}
-                onChange={(e) => handleFiltersChange('status', e.target.value)}
-              >
-                <option value="">All</option>
-                <option value="Baru">Baru</option>
-                <option value="Dalam Proses">Dalam Proses</option>
-                <option value="Selesai">Selesai</option>
-              </select>
-            </label>
-          </div>
-
-              {/* Filter by Date */}
-          <div>
-            <label className="block text-sm font-medium">
-              Date:
-              <input
-                type="date"
-                className="block w-full mt-1 p-2 border rounded-lg"
-                value={filters.date}
-                onChange={(e) => handleFiltersChange('date', e.target.value)}
-              />
-            </label>
-          </div>
-
-          {/* Filter by Name */}
-          <div>
-            <label className="block text-sm font-medium">
-              Name:
-              <input
-                type="text"
-                className="block w-full mt-1 p-2 border rounded-lg"
-                placeholder="Enter name"
-                value={filters.name}
-                onChange={(e) => handleFiltersChange('name', e.target.value)}
-              />
-            </label>
-          </div>
-
-        </div>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-lg p-6 mt-6 max-w-3xl mx-auto">
-        {filteredTickets.map((ticket) => (
-          <div key={ticket.id} className="border-b border-gray-300 pb-4 mb-4">
-            <p className="text-lg font-semibold">Nama: {ticket.name}</p>
-            <p>Kategori: {ticket.category}</p>
-            <p>Prioritas: {ticket.priority}</p>
-            <p>Status: {ticket.status}</p>
-            <p>Deskripsi: {ticket.description}</p>
-            <p>Submitted Time: {ticket.time}</p>
-            <p>Duration: {calculateDuration(ticket.progress_start_time, ticket.completed_time)}</p>
-            {ticket.attachment && (
-            <p>
-              Attachment:{" "}
-              <a
-                href={`http://localhost:8080/uploads/${ticket.attachment.replace('/uploads/', '').replace('.', '')}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-blue-500 hover:underline"
-              >
-                {ticket.attachment}
-              </a>
-            </p>
-             )}
-
-            <div className="mt-4">
+      {/* Scrollable Content */}
+      <div className="pt-20 flex-1 overflow-y-auto pb-6">
+        {/* Filters Section */}
+        <div className="bg-white rounded-lg shadow-lg p-8 mt-6 max-w-3xl mx-auto">
+          <h2 className="text-lg font-bold mb-4">Filters</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
               <label className="block text-sm font-medium">
-                Update Status:
+                Priority:
                 <select
-                  value={ticket.status}
-                  onChange={(e) => handleStatusChange(ticket.id, e.target.value)}
-                  className="block mt-1 p-2 border rounded-lg w-full"
+                  className="block w-full mt-1 p-2 border rounded-lg"
+                  value={filters.priority}
+                  onChange={(e) => handleFiltersChange('priority', e.target.value)}
                 >
+                  <option value="">All</option>
+                  <option value="Tinggi">Tinggi</option>
+                  <option value="Sedang">Sedang</option>
+                  <option value="Rendah">Rendah</option>
+                </select>
+              </label>
+            </div>
+            <div>
+              <label className="block text-sm font-medium">
+                Status:
+                <select
+                  className="block w-full mt-1 p-2 border rounded-lg"
+                  value={filters.status}
+                  onChange={(e) => handleFiltersChange('status', e.target.value)}
+                >
+                  <option value="">All</option>
                   <option value="Baru">Baru</option>
                   <option value="Dalam Proses">Dalam Proses</option>
                   <option value="Selesai">Selesai</option>
                 </select>
               </label>
             </div>
-
-            <div className="mt-4">
+            <div>
               <label className="block text-sm font-medium">
-                Assign Person in Charge:
+                Date:
                 <input
-                  type="text"
-                  value={ticket.person_in_charge || ''}
-                  onChange={(e) => handlePersonChange(ticket.id, e.target.value)}
-                  placeholder="Enter person in charge"
-                  className="block mt-1 p-2 border rounded-lg w-full"
+                  type="date"
+                  className="block w-full mt-1 p-2 border rounded-lg"
+                  value={filters.date}
+                  onChange={(e) => handleFiltersChange('date', e.target.value)}
                 />
               </label>
             </div>
-
-            <button
-              onClick={() => handleSubmit(ticket.id)}
-              className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-            >
-              Submit
-            </button>
+            <div>
+              <label className="block text-sm font-medium">
+                Name:
+                <input
+                  type="text"
+                  className="block w-full mt-1 p-2 border rounded-lg"
+                  placeholder="Enter name"
+                  value={filters.name}
+                  onChange={(e) => handleFiltersChange('name', e.target.value)}
+                />
+              </label>
+            </div>
           </div>
-        ))}
+        </div>
+
+        {/* Tickets Section */}
+        <div className="grid grid-cols-1 gap-6 p-4">
+          {filteredTickets.map((ticket) => (
+            <div key={ticket.id} className="bg-white rounded-lg shadow-lg p-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <p className="text-lg font-semibold">Nama: {ticket.name}</p>
+                  <p>Kategori: {ticket.category}</p>
+                  <p>Prioritas: {ticket.priority}</p>
+                  <p>Status: {ticket.status}</p>
+                  <p>Deskripsi: {ticket.description}</p>
+                </div>
+                  <div>
+                    <p>Submitted Time: {ticket.created_at.replace('T', ' ').replace('Z', '')}</p>
+                    <p>
+                      Progress Start Time:{' '}
+                      {ticket.progress_start_time?.Valid
+                        ? ticket.progress_start_time.String.replace('T', ' ').replace('Z', '')
+                        : 'N/A'}
+                    </p>
+                    <p>
+                      Completed Time:{' '}
+                      {ticket.completed_time?.Valid
+                        ? ticket.completed_time.String.replace('T', ' ').replace('Z', '')
+                        : 'N/A'}
+                    </p>
+                  </div>
+              </div>
+              {ticket.attachment && (
+                <p className="mt-4">
+                  Attachment:{' '}
+                  <a
+                    href={`http://localhost:8080/uploads/${ticket.attachment.replace('/uploads/','').replace('.', '')}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-blue-500 hover:underline"
+                  >
+                    Lampiran
+                  </a>
+                </p>
+              )}
+              <div className="mt-4">
+                <label className="block text-sm font-medium">
+                  Update Status:
+                  <select
+                    value={ticket.status}
+                    onChange={(e) => handleStatusChange(ticket.id, e.target.value)}
+                    className="block mt-1 p-2 border rounded-lg w-full"
+                  >
+                    <option value="Baru">Baru</option>
+                    <option value="Dalam Proses">Dalam Proses</option>
+                    <option value="Selesai">Selesai</option>
+                  </select>
+                </label>
+              </div>
+              <div className="mt-4">
+                <label className="block text-sm font-medium">
+                  Assign Person in Charge:
+                  <input
+                    type="text"
+                    value={ticket.person_in_charge || ''}
+                    onChange={(e) => handlePersonChange(ticket.id, e.target.value)}
+                    placeholder="Enter person in charge"
+                    className="block mt-1 p-2 border rounded-lg w-full"
+                  />
+                </label>
+              </div>
+              <button
+                onClick={() => handleSubmit(ticket.id)}
+                className="mt-4 px-6 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
+              >
+                Submit
+              </button>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );

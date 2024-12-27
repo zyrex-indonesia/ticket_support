@@ -18,21 +18,21 @@ func InitDB() {
 
 	// Create tickets table with the correct schema
 	ticketsQuery := `
-    CREATE TABLE IF NOT EXISTS tickets (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        name TEXT NOT NULL,
-        description TEXT NOT NULL,
-        priority TEXT NOT NULL,
-        category TEXT NOT NULL,
-        attachment TEXT,
-        status TEXT DEFAULT 'Baru',
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        progress_start_time DATETIME,
-        completed_time DATETIME,
-        person_in_charge TEXT, -- Adding this column back
-        date TEXT NOT NULL,
-        time TEXT NOT NULL
-    );`
+        CREATE TABLE IF NOT EXISTS tickets (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            description TEXT NOT NULL,
+            priority TEXT NOT NULL,
+            category TEXT NOT NULL,
+            attachment TEXT NOT NULL, -- Attachment is NOT NULL
+            status TEXT DEFAULT 'Baru',
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            progress_start_time DATETIME DEFAULT NULL, -- Allowing NULL
+            completed_time DATETIME DEFAULT NULL, -- Allowing NULL
+            person_in_charge TEXT NOT NULL, -- Person in charge is NOT NULL
+            date TEXT NOT NULL,
+            time TEXT NOT NULL
+        );`
 	if _, err := DB.Exec(ticketsQuery); err != nil {
 		log.Fatalf("Failed to initialize tickets table: %v", err)
 	}
