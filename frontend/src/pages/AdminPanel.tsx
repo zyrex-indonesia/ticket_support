@@ -94,6 +94,61 @@ const AdminPanel: React.FC = () => {
     setFilteredTickets(filtered);
   }, [filters, tickets]);
 
+  const handleExportCSV = () => {
+    if (filteredTickets.length === 0) {
+      alert('No tickets to export.');
+      return;
+    }
+  
+    // Define headers for the CSV
+    const headers = [
+      'ID',
+      'Name',
+      'Description',
+      'Priority',
+      'Category',
+      'Status',
+      'Created At',
+      'Progress Start Time',
+      'Completed Time',
+      'Person In Charge',
+      'Attachment',
+    ];
+  
+    // Map tickets into rows for the CSV
+    const rows = filteredTickets.map((ticket) => [
+      ticket.id,
+      ticket.name.replace(/"/g, '""'), // Escape quotes
+      ticket.description.replace(/"/g, '""'), // Escape quotes
+      ticket.priority.replace(/"/g, '""'), // Escape quotes
+      ticket.category.replace(/"/g, '""'), // Escape quotes
+      ticket.status.replace(/"/g, '""'), // Escape quotes
+      ticket.created_at.replace('T', ' ').replace('Z', ''),
+      ticket.progress_start_time?.Valid
+        ? ticket.progress_start_time.String.replace('T', ' ').replace('Z', '')
+        : 'N/A',
+      ticket.completed_time?.Valid
+        ? ticket.completed_time.String.replace('T', ' ').replace('Z', '')
+        : 'N/A',
+      ticket.person_in_charge ? ticket.person_in_charge.replace(/"/g, '""') : 'N/A',
+      ticket.attachment ? ticket.attachment.replace(/"/g, '""') : 'N/A',
+    ]);
+  
+    // Add quotes to each field and join rows with commas
+    const csvContent =
+      'data:text/csv;charset=utf-8,' +
+      [headers.join(','), ...rows.map((row) => row.map((field) => `"${field}"`).join(','))].join('\n');
+  
+    // Encode and trigger the download
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', 'tickets_report.csv');
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };  
+  
   const handleStatusChange = (ticketId: number, newStatus: string) => {
     const updated = filteredTickets.map((ticket) =>
       ticket.id === ticketId ? { ...ticket, status: newStatus } : ticket
@@ -197,6 +252,12 @@ const AdminPanel: React.FC = () => {
               </label>
             </div>
           </div>
+          <button
+            onClick={handleExportCSV}
+            className="mt-4 px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 w-full md:w-auto"
+          >
+            Export to CSV
+          </button>
         </div>
 
         {/* Tickets Section */}
@@ -231,7 +292,7 @@ const AdminPanel: React.FC = () => {
                 <p className="mt-4">
                   Attachment:{' '}
                   <a
-                    href={`http://localhost:8080/uploads/${ticket.attachment.replace('/uploads/','').replace('.', '')}`}
+                    href={`http://localhost:8080/uploads/${ticket.attachment.replace('/uploads/', '').replace('.', '')}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-500 hover:underline"
